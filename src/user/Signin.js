@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Base from "../core/Base";
 import { Link, Redirect } from "react-router-dom";
 
-import { signin, authenticate, isAuthenticated } from "../auth/helper";
+import { signin, authenticate, isAutheticated } from "../auth/helper";
 
 const Signin = () => {
   const [values, setValues] = useState({
@@ -10,34 +10,33 @@ const Signin = () => {
     password: "",
     error: "",
     loading: false,
-    didRedirect: false,
+    didRedirect: false
   });
 
   const { email, password, error, loading, didRedirect } = values;
-  const { user } = isAuthenticated();
+  const { user } = isAutheticated();
 
-  const handleChange = (name) => (event) => {
+  const handleChange = name => event => {
     setValues({ ...values, error: false, [name]: event.target.value });
   };
 
-  const onSubmit = (event) => {
+  const onSubmit = event => {
     event.preventDefault();
     setValues({ ...values, error: false, loading: true });
     signin({ email, password })
-      .then((data) => {
+      .then(data => {
         if (data.error) {
           setValues({ ...values, error: data.error, loading: false });
         } else {
           authenticate(data, () => {
             setValues({
               ...values,
-              didRedirect: true,
+              didRedirect: true
             });
           });
         }
       })
-      .catch(console.log("Signin Request Failed"));
-    // .console.log("Signin Request Failed");
+      .catch(console.log("signin request failed"));
   };
 
   const performRedirect = () => {
@@ -48,12 +47,37 @@ const Signin = () => {
         return <p>redirect to user dashboard</p>;
       }
     }
-    if (isAuthenticated()) {
+    if (isAutheticated()) {
       return <Redirect to="/" />;
     }
   };
 
-  const signinForm = () => {
+  const loadingMessage = () => {
+    return (
+      loading && (
+        <div className="alert alert-info">
+          <h2>Loading...</h2>
+        </div>
+      )
+    );
+  };
+
+  const errorMessage = () => {
+    return (
+      <div className="row">
+        <div className="col-md-6 offset-sm-3 text-left">
+          <div
+            className="alert alert-danger"
+            style={{ display: error ? "" : "none" }}
+          >
+            {error}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const signInForm = () => {
     return (
       <div className="row">
         <div className="col-md-6 offset-sm-3 text-left">
@@ -67,6 +91,7 @@ const Signin = () => {
                 type="email"
               />
             </div>
+
             <div className="form-group">
               <label className="text-light">Password</label>
               <input
@@ -85,38 +110,13 @@ const Signin = () => {
     );
   };
 
-  const loadingMessage = () => {
-    return (
-      loading && (
-        <div class="alert alert-info">
-          <h2>Loading...</h2>
-        </div>
-      )
-    );
-  };
-
-  const errorMessage = () => {
-    return (
-      <div className="row">
-        <div className="col-md-6 offset-sm-3">
-          <div
-            className="alert alert-danger"
-            style={{ display: error ? "" : "none" }}
-          >
-            {error}
-          </div>
-        </div>
-      </div>
-    );
-  };
-
   return (
-    <Base title="Signin Page" description="A Page For User Signup!">
+    <Base title="Sign In page" description="A page for user to sign in!">
       {loadingMessage()}
       {errorMessage()}
-      {signinForm()}
+      {signInForm()}
       {performRedirect()}
-      <p className="text-white text-white">{JSON.stringify.values}</p>
+      <p className="text-white text-center">{JSON.stringify(values)}</p>
     </Base>
   );
 };
