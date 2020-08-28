@@ -14,7 +14,7 @@ const Signin = () => {
   });
 
   const { email, password, error, loading, didRedirect } = values;
-  const { user } = isAuthenticated();
+  // const { user } = isAuthenticated();
 
   const handleChange = (name) => (event) => {
     setValues({ ...values, error: false, [name]: event.target.value });
@@ -40,18 +40,18 @@ const Signin = () => {
     // .console.log("Signin Request Failed");
   };
 
-  const performRedirect = () => {
-    if (didRedirect) {
-      if (user && user.role === 1) {
-        return <p>redirect to admin</p>;
-      } else {
-        return <p>redirect to user dashboard</p>;
-      }
-    }
-    if (isAuthenticated()) {
-      return <Redirect to="/" />;
-    }
-  };
+  // const performRedirect = () => {
+  //   if (didRedirect) {
+  //     if (user && user.role === 1) {
+  //       return <p>redirect to admin</p>;
+  //     } else {
+  //       return <p>redirect to user dashboard</p>;
+  //     }
+  //   }
+  //   if (isAuthenticated()) {
+  //     return <Redirect to="/" />;
+  //   }
+  // };
 
   const signinForm = () => {
     return (
@@ -115,7 +115,7 @@ const Signin = () => {
       {loadingMessage()}
       {errorMessage()}
       {signinForm()}
-      {performRedirect()}
+      {/* {performRedirect()} */}
       <p className="text-white text-white">{JSON.stringify.values}</p>
     </Base>
   );
