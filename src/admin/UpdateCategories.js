@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from "react";
 import Base from "../core/Base";
-import { Link, withRouter, Redirect} from "react-router-dom";
-import { createaProduct, getCategories } from "./helper/adminapicall";
+import { Link, withRouter, Redirect } from "react-router-dom";
+import {
+  createaProduct,
+  getCategories,
+  getaproduct,
+  updateProduct,
+} from "./helper/adminapicall";
 import { isAuthenticated } from "../auth/helper/index";
 
-const AddProduct = () => {
+const UpdateCategories = ({ match }) => {
   const { user, token } = isAuthenticated();
   const [values, setValues] = useState({
     name: "",
@@ -37,43 +42,65 @@ const AddProduct = () => {
     didRedirect,
   } = values;
 
-  const preload = () => {
-    getCategories().then((data) => {
+  const preload = (productId) => {
+    getaproduct(productId).then((data) => {
       console.log(data);
-      if (data.error) {
-        setValues({ ...values, error: data.error });
-      } else {
-        setValues({ ...values, categories: data, formData: new FormData() });
-      }
-    });
-  };
-
-  useEffect(() => {
-    preload();
-  }, []);
-
-  const onSubmit = (event, props) => {
-    event.preventDefault();
-    setValues({ ...values, error: "", loading: true });
-    createaProduct(user._id, token, formData).then((data) => {
-      console.log(data)
       if (data.error) {
         setValues({ ...values, error: data.error });
       } else {
         setValues({
           ...values,
-          name: "",
-          description: "",
-          price: "",
-          photo: "",
-          stock: "",
-          loading: false,
-          createdProduct: data.name,
+          name: data.name,
+          description: data.description,
+          price: data.price,
+          category: data.category._id,
+          stock: data.stock,
+          formData: new FormData(),
         });
+        preloadCategories();
       }
     });
   };
 
+  const preloadCategories = () => {
+    getCategories().then((data) => {
+      console.log(data);
+      if (data.error) {
+        setValues({ ...values, error: data.error });
+      } else {
+        setValues({ categories: data, formData: new FormData() });
+      }
+    });
+  };
+
+  useEffect(() => {
+    preload(match.params.productId);
+  }, []);
+
+  const onSubmit = (event) => {
+    event.preventDefault();
+    setValues({ ...values, error: "", loading: true });
+    updateProduct(match.params.productId, user._id, token, formData).then(
+      (data) => {
+        // alert(JSON.stringify(data));
+        console.log(data);
+        if (data.error) {
+          setValues({ ...values, error: data.error });
+        } else {
+          setValues({
+            ...values,
+            name: "",
+            description: "",
+            price: "",
+            photo: "",
+            stock: "",
+            loading: false,
+            createdProduct: data.name,
+          });
+        }
+      }
+    );
+  };
 
   // const performRedirect = () => {
   //   // TODO: Do a redirection here
@@ -90,7 +117,6 @@ const AddProduct = () => {
   //   }
   // };
 
-  
   const handleChange = (name) => (event) => {
     const value = name === "photo" ? event.target.files[0] : event.target.value;
     formData.set(name, value);
@@ -105,7 +131,7 @@ const AddProduct = () => {
             className='alert alert-success'
             style={{ display: createdProduct ? "" : "none" }}
           >
-            <h4>{createdProduct} Created Successfully</h4>
+            <h4>{createdProduct} Updated Successfully</h4>
           </div>
         </div>
       </div>
@@ -183,7 +209,7 @@ const AddProduct = () => {
         onClick={onSubmit}
         className='btn btn-outline-success mb-3'
       >
-        Create Product
+        Update Product
       </button>
     </form>
   );
@@ -208,4 +234,4 @@ const AddProduct = () => {
   );
 };
 
-export default AddProduct;
+export default UpdateCategories;
